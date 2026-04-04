@@ -1,28 +1,37 @@
 package com.hotel.booking.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hotel.booking.dto.AuthLoginRequest;
+import com.hotel.booking.dto.AuthRegisterRequest;
+import com.hotel.booking.dto.AuthResponse;
+import com.hotel.booking.dto.RegisterResponse;
+import com.hotel.booking.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.hotel.booking.model.User;
-import com.hotel.booking.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody AuthRegisterRequest request) {
+        return ResponseEntity.ok(authService.registerCustomer(request));
+    }
 
-        if (userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Email already exists");
-        }
+    @PostMapping("/register/guide")
+    public ResponseEntity<RegisterResponse> registerGuide(@Valid @RequestBody AuthRegisterRequest request) {
+        return ResponseEntity.ok(authService.registerGuide(request));
+    }
 
-        user.setRole("USER");
-
-        return ResponseEntity.ok(userRepository.save(user));
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthLoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
