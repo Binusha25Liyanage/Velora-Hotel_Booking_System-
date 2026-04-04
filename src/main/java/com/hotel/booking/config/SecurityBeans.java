@@ -36,8 +36,8 @@ public class SecurityBeans {
 		http
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/register/guide").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/hotels/**", "/api/rooms/**").permitAll()
+						.requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/register/guide", "/api/guides/register").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/hotels/**", "/api/rooms/**", "/api/guides/**", "/api/reviews/**", "/api/map/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/hotels").hasRole("ADMIN")
 						.requestMatchers(HttpMethod.POST, "/api/rooms").hasAnyRole("ADMIN", "HOTEL_ADMIN")
 						.anyRequest().authenticated()

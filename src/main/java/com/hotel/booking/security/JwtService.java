@@ -69,7 +69,7 @@ public class JwtService {
         byte[] keyBytes;
         try {
             keyBytes = Decoders.BASE64.decode(jwtSecret);
-        } catch (IllegalArgumentException ex) {
+        } catch (RuntimeException ex) {
             keyBytes = jwtSecret.getBytes();
         }
         return Keys.hmacShaKeyFor(keyBytes);

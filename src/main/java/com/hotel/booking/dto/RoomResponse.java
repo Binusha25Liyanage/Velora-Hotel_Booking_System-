@@ -1,5 +1,7 @@
 package com.hotel.booking.dto;
 
+import java.util.List;
+
 public class RoomResponse {
 
     private String id;
@@ -8,6 +10,10 @@ public class RoomResponse {
     private String type;
     private double pricePerNight;
     private boolean available;
+    private Integer maxOccupancy;
+    private String description;
+    private List<String> images;
+    private List<String> amenities;
 
     public RoomResponse() {
     }
@@ -19,6 +25,21 @@ public class RoomResponse {
         this.type = type;
         this.pricePerNight = pricePerNight;
         this.available = available;
+    }
+
+    public RoomResponse(String id, String hotelId, String roomNumber, String type, double pricePerNight,
+                        boolean available, Integer maxOccupancy, String description, List<String> images,
+                        List<String> amenities) {
+        this.id = id;
+        this.hotelId = hotelId;
+        this.roomNumber = roomNumber;
+        this.type = type;
+        this.pricePerNight = pricePerNight;
+        this.available = available;
+        this.maxOccupancy = maxOccupancy;
+        this.description = description;
+        this.images = images;
+        this.amenities = amenities;
     }
 
     public String getId() {
@@ -67,5 +88,37 @@ public class RoomResponse {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public Integer getMaxOccupancy() {
+        return maxOccupancy;
+    }
+
+    public void setMaxOccupancy(Integer maxOccupancy) {
+        this.maxOccupancy = maxOccupancy;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public List<String> getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(List<String> amenities) {
+        this.amenities = amenities;
     }
 }

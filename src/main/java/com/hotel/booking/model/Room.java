@@ -3,6 +3,9 @@ package com.hotel.booking.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document(collection = "rooms")
 public class Room {
 
@@ -14,6 +17,10 @@ public class Room {
     private String type;      // SINGLE, DOUBLE, SUITE
     private double pricePerNight;
     private boolean available;
+    private Integer maxOccupancy;
+    private String description;
+    private List<String> images = new ArrayList<>();
+    private List<String> amenities = new ArrayList<>();
 
     public Room() {}
 
@@ -64,5 +71,37 @@ public class Room {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public Integer getMaxOccupancy() {
+        return maxOccupancy;
+    }
+
+    public void setMaxOccupancy(Integer maxOccupancy) {
+        this.maxOccupancy = maxOccupancy;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public List<String> getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(List<String> amenities) {
+        this.amenities = amenities;
     }
 }
