@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.hotel.booking.model.Room;
+import com.hotel.booking.dto.RoomRequest;
+import com.hotel.booking.dto.RoomResponse;
 import com.hotel.booking.service.RoomService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -20,13 +22,13 @@ public class RoomController {
 
     // Add a room
     @PostMapping
-    public Room addRoom(@RequestBody Room room) {
-        return roomService.addRoom(room);
+    public RoomResponse addRoom(@Valid @RequestBody RoomRequest request) {
+        return roomService.addRoom(request);
     }
 
     // Get rooms by hotel
     @GetMapping("/hotel/{hotelId}")
-    public List<Room> getRoomsByHotel(@PathVariable String hotelId) {
+    public List<RoomResponse> getRoomsByHotel(@PathVariable String hotelId) {
         return roomService.getRoomsByHotel(hotelId);
     }
 }

@@ -2,8 +2,10 @@ package com.hotel.booking.controller;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.*;
-import com.hotel.booking.model.Hotel;
+import com.hotel.booking.dto.HotelRequest;
+import com.hotel.booking.dto.HotelResponse;
 import com.hotel.booking.service.HotelService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/hotels")
@@ -17,12 +19,12 @@ public class HotelController {
     }
 
     @GetMapping
-    public List<Hotel> getAllHotels() {
+    public List<HotelResponse> getAllHotels() {
         return hotelService.getAllHotels();
     }
 
     @PostMapping
-    public Hotel addHotel(@RequestBody Hotel hotel) {
-        return hotelService.addHotel(hotel);
+    public HotelResponse addHotel(@Valid @RequestBody HotelRequest request) {
+        return hotelService.addHotel(request);
     }
 }
