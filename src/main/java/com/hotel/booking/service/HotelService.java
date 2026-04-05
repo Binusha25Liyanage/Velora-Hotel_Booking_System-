@@ -2,9 +2,13 @@ package com.hotel.booking.service;
 
 import com.hotel.booking.dto.HotelRequest;
 import com.hotel.booking.dto.HotelResponse;
+import com.hotel.booking.dto.HotelDetailResponse;
+import com.hotel.booking.dto.RoomResponse;
 import com.hotel.booking.model.Hotel;
+import com.hotel.booking.model.Room;
 import com.hotel.booking.model.User;
 import com.hotel.booking.repository.HotelRepository;
+import com.hotel.booking.repository.RoomRepository;
 import com.hotel.booking.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,20 +22,33 @@ public class HotelService {
 
     private final HotelRepository hotelRepository;
     private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
 
-    public HotelService(HotelRepository hotelRepository, UserRepository userRepository) {
+    public HotelService(HotelRepository hotelRepository, UserRepository userRepository, RoomRepository roomRepository) {
         this.hotelRepository = hotelRepository;
         this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
     }
 
-    public List<HotelResponse> getAllHotels() {
-        return hotelRepository.findByIsActiveTrue().stream().map(this::toResponse).collect(Collectors.toList());
+    public List<HotelResponse> getAllHotels(String location, Double minRating, Double minPrice, Double maxPrice) {
+        return hotelRepository.findByIsActiveTrue().stream()
+                .filter(h -> matchesLocation(h, location))
+                .filter(h -> minRating == null || h.getRating() >= minRating)
+                .filter(h -> matchesPriceRange(h.getId(), minPrice, maxPrice))
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public HotelResponse getHotelById(String id) {
+    public HotelDetailResponse getHotelById(String id) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel not found"));
-        return toResponse(hotel);
+
+        List<RoomResponse> rooms = roomRepository.findByHotelId(id)
+                .stream()
+                .map(this::toRoomResponse)
+                .collect(Collectors.toList());
+
+        return new HotelDetailResponse(toResponse(hotel), rooms);
     }
 
     public HotelResponse addHotel(HotelRequest request, String requesterEmail) {
@@ -147,5 +164,57 @@ public class HotelService {
                 hotel.isActive(),
                 hotel.getThumbnailUrl()
         );
+    }
+
+    private RoomResponse toRoomResponse(Room room) {
+        return new RoomResponse(
+                room.getId(),
+                room.getHotelId(),
+                room.getRoomNumber(),
+                room.getType(),
+                room.getPricePerNight(),
+                room.isAvailable(),
+                room.getMaxOccupancy(),
+                room.getDescription(),
+                room.getImages(),
+                room.getAmenities()
+        );
+    }
+
+    private boolean matchesLocation(Hotel hotel, String location) {
+        if (location == null || location.isBlank()) {
+            return true;
+        }
+
+        String q = location.toLowerCase();
+        return containsIgnoreCase(hotel.getLocation(), q)
+                || containsIgnoreCase(hotel.getCity(), q)
+                || containsIgnoreCase(hotel.getDistrict(), q);
+    }
+
+    private boolean matchesPriceRange(String hotelId, Double minPrice, Double maxPrice) {
+        if (minPrice == null && maxPrice == null) {
+            return true;
+        }
+
+        List<Room> rooms = roomRepository.findByHotelId(hotelId);
+        if (rooms.isEmpty()) {
+            return false;
+        }
+
+        double lowestRoomPrice = rooms.stream()
+                .mapToDouble(Room::getPricePerNight)
+                .min()
+                .orElse(Double.MAX_VALUE);
+
+        if (minPrice != null && lowestRoomPrice < minPrice) {
+            return false;
+        }
+
+        return maxPrice == null || lowestRoomPrice <= maxPrice;
+    }
+
+    private boolean containsIgnoreCase(String value, String queryLower) {
+        return value != null && value.toLowerCase().contains(queryLower);
     }
 }

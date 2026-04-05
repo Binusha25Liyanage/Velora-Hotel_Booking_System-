@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 import com.hotel.booking.dto.RoomRequest;
 import com.hotel.booking.dto.RoomResponse;
+import com.hotel.booking.dto.RoomAvailabilityResponse;
 import com.hotel.booking.service.RoomService;
 import jakarta.validation.Valid;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -47,5 +50,12 @@ public class RoomController {
     @GetMapping("/hotel/{hotelId}")
     public List<RoomResponse> getRoomsByHotel(@PathVariable String hotelId) {
         return roomService.getRoomsByHotel(hotelId);
+    }
+
+    @GetMapping("/{id}/availability")
+    public RoomAvailabilityResponse checkAvailability(@PathVariable String id,
+                                                      @RequestParam LocalDate checkIn,
+                                                      @RequestParam LocalDate checkOut) {
+        return roomService.checkAvailability(id, checkIn, checkOut);
     }
 }

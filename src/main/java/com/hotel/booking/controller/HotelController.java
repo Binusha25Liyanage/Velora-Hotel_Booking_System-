@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.hotel.booking.dto.HotelDetailResponse;
 import com.hotel.booking.dto.HotelRequest;
 import com.hotel.booking.dto.HotelResponse;
 import com.hotel.booking.service.HotelService;
@@ -21,12 +22,15 @@ public class HotelController {
     }
 
     @GetMapping
-    public List<HotelResponse> getAllHotels() {
-        return hotelService.getAllHotels();
+    public List<HotelResponse> getAllHotels(@RequestParam(required = false) String location,
+                                            @RequestParam(required = false) Double minRating,
+                                            @RequestParam(required = false) Double minPrice,
+                                            @RequestParam(required = false) Double maxPrice) {
+        return hotelService.getAllHotels(location, minRating, minPrice, maxPrice);
     }
 
     @GetMapping("/{id}")
-    public HotelResponse getHotelById(@PathVariable String id) {
+    public HotelDetailResponse getHotelById(@PathVariable String id) {
         return hotelService.getHotelById(id);
     }
 

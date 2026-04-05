@@ -2,9 +2,12 @@ package com.hotel.booking.service;
 
 import com.hotel.booking.dto.RoomRequest;
 import com.hotel.booking.dto.RoomResponse;
+import com.hotel.booking.dto.RoomAvailabilityResponse;
+import com.hotel.booking.model.BookingStatus;
 import com.hotel.booking.model.Hotel;
 import com.hotel.booking.model.Room;
 import com.hotel.booking.model.User;
+import com.hotel.booking.repository.BookingRepository;
 import com.hotel.booking.repository.HotelRepository;
 import com.hotel.booking.repository.RoomRepository;
 import com.hotel.booking.repository.UserRepository;
@@ -12,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,11 +23,16 @@ import java.util.stream.Collectors;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final BookingRepository bookingRepository;
     private final HotelRepository hotelRepository;
     private final UserRepository userRepository;
 
-    public RoomService(RoomRepository roomRepository, HotelRepository hotelRepository, UserRepository userRepository) {
+    public RoomService(RoomRepository roomRepository,
+                       BookingRepository bookingRepository,
+                       HotelRepository hotelRepository,
+                       UserRepository userRepository) {
         this.roomRepository = roomRepository;
+        this.bookingRepository = bookingRepository;
         this.hotelRepository = hotelRepository;
         this.userRepository = userRepository;
     }
@@ -72,6 +81,33 @@ public class RoomService {
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    public RoomAvailabilityResponse checkAvailability(String roomId, LocalDate checkIn, LocalDate checkOut) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found"));
+
+        if (checkIn == null || checkOut == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "checkIn and checkOut are required");
+        }
+        if (!checkOut.isAfter(checkIn)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "checkOut must be after checkIn");
+        }
+        if (!checkIn.isAfter(LocalDate.now()) || !checkOut.isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dates must be in the future");
+        }
+
+        boolean hasConflicts = !bookingRepository
+                .findByRoomIdAndStatusInAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                        roomId,
+                        List.of(BookingStatus.CONFIRMED),
+                        checkOut,
+                        checkIn
+                )
+                .isEmpty();
+
+        boolean available = room.isAvailable() && !hasConflicts;
+        return new RoomAvailabilityResponse(roomId, checkIn.toString(), checkOut.toString(), available);
     }
 
     private RoomResponse toResponse(Room room) {
